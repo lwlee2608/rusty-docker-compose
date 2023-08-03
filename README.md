@@ -23,12 +23,10 @@ Here's a basic example of how to use rusty-docker-compose:
 ```rust
 use rusty_docker_compose::docker_compose::DockerCompose;
 
-let docker_compose = DockerCompose::new("path/to/docker-compose.yml", "path/to/logs/dir");
-
-    let docker_compose = DockerCompose::new(
-        "tests/docker-compose.yaml",
-        "target/docker_logs",
-    );
+let docker_compose = DockerCompose::new(
+    "tests/docker-compose.yaml",
+    "target/docker_logs",
+);
 
 docker_compose.up();
 // ... run your tests ...
