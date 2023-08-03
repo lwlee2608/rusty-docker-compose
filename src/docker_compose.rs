@@ -34,10 +34,11 @@ impl DockerCompose {
         }
         std::fs::create_dir_all(dir).unwrap();
 
-        let output = Command::new("docker")
+        let output = Command::new("docker-compose")
+            .arg("-f")
+            .arg(self.file.clone())
             .arg("ps")
-            .arg("--format")
-            .arg("{{.Names}}")
+            .arg("--services")
             .output()
             .unwrap();
 
