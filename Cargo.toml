@@ -1,5 +1,5 @@
 [package]
-name = "docker_compose"
+name = "rusty-docker-compose"
 version = "0.1.0"
 edition = "2021"
 authors = ["Jason Lee<lwlee2608@gmail.com>"]
