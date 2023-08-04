@@ -14,7 +14,7 @@ Add `rusty-docker-compose` as a dependency in your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-rusty-docker-compose = "0.1.0"
+rusty-docker-compose = "0.2.1"
 ```
 
 ## Usage
