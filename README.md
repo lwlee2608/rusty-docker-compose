@@ -21,7 +21,7 @@ rusty-docker-compose = "0.1.0"
 Here's a basic example of how to use rusty-docker-compose:
 
 ```rust
-use rusty_docker_compose::docker_compose::DockerCompose;
+use rusty_docker_compose::DockerCompose;
 
 let docker_compose = DockerCompose::new(
     "tests/docker-compose.yaml",
