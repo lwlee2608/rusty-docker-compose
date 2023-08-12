@@ -3,6 +3,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 use std::thread;
 
+#[derive(Clone)]
 pub struct DockerCompose {
     file: String,
     logs_dir: String,
@@ -16,7 +17,17 @@ impl DockerCompose {
         }
     }
 
+    fn setup_shutdown(&self) {
+        let self_clone = self.clone();
+        let default_hook = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |panic_info| {
+            default_hook(panic_info);
+            self_clone.down();
+        }));
+    }
+
     pub fn up(&self) {
+        self.setup_shutdown();
         let output = Command::new("docker-compose")
             .arg("-f")
             .arg(self.file.clone())
