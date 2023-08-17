@@ -14,23 +14,35 @@ Add `rusty-docker-compose` as a dependency in your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-rusty-docker-compose = "0.2.2"
+rusty-docker-compose = "0.3.0"
 ```
 
 ## Usage
 Here's a basic example of how to use rusty-docker-compose:
 
 ```rust
-use rusty_docker_compose::DockerCompose;
+use rusty_docker_compose::DockerComposeCmd;
 
-let docker_compose = DockerCompose::new(
+let docker_compose_cmd = DockerComposeCmd::new(
     "tests/docker-compose.yaml",
     "target/docker_logs",
 );
 
-docker_compose.up();
+docker_compose_cmd.up();
 // ... run your tests ...
-docker_compose.down();
+docker_compose_cmd.down();
+```
+
+Alternatively, you can use `DockerCompose` to automatically start up and tear down the docker compose when it goes out of scope:
+```rust
+use rusty_docker_compose::DockerCompose;
+
+let _docker_compose = DockerCompose::new(
+    "tests/docker-compose.yaml",
+    "target/docker_logs",
+);
+
+// ... run your tests ...
 ```
 
 For more detailed examples, please refer to the documentation.

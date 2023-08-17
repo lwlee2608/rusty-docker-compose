@@ -4,30 +4,20 @@ use std::process::{Command, Stdio};
 use std::thread;
 
 #[derive(Clone)]
-pub struct DockerCompose {
+pub struct DockerComposeCmd {
     file: String,
     logs_dir: String,
 }
 
-impl DockerCompose {
-    pub fn new(file: &str, logs_dir: &str) -> DockerCompose {
-        DockerCompose {
+impl DockerComposeCmd {
+    pub fn new(file: &str, logs_dir: &str) -> DockerComposeCmd {
+        DockerComposeCmd {
             file: file.to_string(),
-            logs_dir: logs_dir.to_string(), 
+            logs_dir: logs_dir.to_string(),
         }
     }
 
-    fn setup_shutdown(&self) {
-        let self_clone = self.clone();
-        let default_hook = std::panic::take_hook();
-        std::panic::set_hook(Box::new(move |panic_info| {
-            default_hook(panic_info);
-            self_clone.down();
-        }));
-    }
-
     pub fn up(&self) {
-        self.setup_shutdown();
         let output = Command::new("docker-compose")
             .arg("-f")
             .arg(self.file.clone())
@@ -63,20 +53,21 @@ impl DockerCompose {
                 let file_path = std::path::PathBuf::from(file_name);
                 let docker_compose_file = self.file.clone();
                 thread::spawn(move || {
-                    let follow_container_log = |container: String, file_path: std::path::PathBuf| {
-                        let file = File::create(file_path).unwrap();
-                        let _ = Command::new("docker-compose")
-                            .arg("-f")
-                            .arg(docker_compose_file)
-                            .arg("logs")
-                            .arg("--follow")
-                            .arg("--no-log-prefix")
-                            .arg(&container)
-                            .stdout(Stdio::from(file))
-                            .spawn()
-                            .unwrap();
-                    };
-                
+                    let follow_container_log =
+                        |container: String, file_path: std::path::PathBuf| {
+                            let file = File::create(file_path).unwrap();
+                            let _ = Command::new("docker-compose")
+                                .arg("-f")
+                                .arg(docker_compose_file)
+                                .arg("logs")
+                                .arg("--follow")
+                                .arg("--no-log-prefix")
+                                .arg(&container)
+                                .stdout(Stdio::from(file))
+                                .spawn()
+                                .unwrap();
+                        };
+
                     follow_container_log(container, file_path);
                 });
             })
@@ -92,5 +83,24 @@ impl DockerCompose {
             .arg("down")
             .output()
             .expect("Failed to execute command");
+    }
+}
+
+
+pub struct DockerCompose {
+    cmd: DockerComposeCmd,
+}
+
+impl DockerCompose {
+    pub fn new(file: &str, logs_dir: &str) -> DockerCompose {
+        let cmd = DockerComposeCmd::new(file, logs_dir);
+        cmd.up();
+        DockerCompose { cmd }
+    }
+}
+
+impl Drop for DockerCompose {
+    fn drop(&mut self) {
+        self.cmd.down();
     }
 }
