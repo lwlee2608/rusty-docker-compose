@@ -1,3 +1,4 @@
+use std::env;
 use std::fs::File;
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -17,8 +18,18 @@ impl DockerComposeCmd {
         }
     }
 
+    fn get_docker_compose_command() -> &'static str {
+        if Command::new("docker-compose").output().is_ok() {
+            return "docker-compose";
+        } else {
+            return "docker compose";
+        }
+    }
+
     pub fn up(&self) {
-        let output = Command::new("docker-compose")
+        let docker_compose_command = Self::get_docker_compose_command();
+
+        let output = Command::new(docker_compose_command)
             .arg("-f")
             .arg(self.file.clone())
             .arg("up")
@@ -35,7 +46,7 @@ impl DockerComposeCmd {
         }
         std::fs::create_dir_all(dir).unwrap();
 
-        let output = Command::new("docker-compose")
+        let output = Command::new(docker_compose_command)
             .arg("-f")
             .arg(self.file.clone())
             .arg("ps")
@@ -56,7 +67,7 @@ impl DockerComposeCmd {
                     let follow_container_log =
                         |container: String, file_path: std::path::PathBuf| {
                             let file = File::create(file_path).unwrap();
-                            let _ = Command::new("docker-compose")
+                            let _ = Command::new(docker_compose_command)
                                 .arg("-f")
                                 .arg(docker_compose_file)
                                 .arg("logs")
@@ -77,7 +88,9 @@ impl DockerComposeCmd {
     pub fn down(&self) {
         println!("Gracefully shutting down...");
 
-        let _output = Command::new("docker-compose")
+        let docker_compose_command = Self::get_docker_compose_command();
+
+        let _output = Command::new(docker_compose_command)
             .arg("-f")
             .arg(self.file.clone())
             .arg("down")
@@ -85,7 +98,6 @@ impl DockerComposeCmd {
             .expect("Failed to execute command");
     }
 }
-
 
 pub struct DockerCompose {
     cmd: DockerComposeCmd,
